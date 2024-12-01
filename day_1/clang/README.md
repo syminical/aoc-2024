@@ -6,21 +6,17 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <regex.h>
 #include <string.h>
 
 
 
 #define HELP_TEXT		"\nUsage: list_distance [FILE]\nPrint the distance between the two lists in FILE.\n\ne.g. FILE:\n   3  4\n   9  5\n   8  7\n\n"
-#define IN_FILE_NAME	"./input/input_part_1"
 #define MAX_LINE_LEN	15	/* $ wc -L FILE  (don't forget the \n and the \0) */
 
 
 
 /* file io */
-void	open_files (FILE **in_file);
+void	open_files (FILE **in_file, char *path);
 void	close_files (FILE **in_file);
 size_t	f_get_line (FILE **in_file, char *line_buffer, size_t max_len);
 
@@ -34,11 +30,11 @@ int main (size_t arg_count, char *args[arg_count])
 	/* ensure the input file is provided */
 	if (arg_count < 2) {
 		printf(HELP_TEXT);
-		exit(0);
+		return 0;
 	}
 
 	FILE *in_file;
-	open_files(&in_file);
+	open_files(&in_file, args[1]);
 
 	/* find out how many lines the file has */
 	size_t line_len;
@@ -118,12 +114,12 @@ size_t f_get_line (FILE **in_file, char *line_buffer, size_t max_len)
 	- check if the file exists
 	- open the file stream for in_file
 */
-void open_files (FILE **in_file)
+void open_files (FILE **in_file, char *path)
 {
 	/* open in_file as "r" and make sure it exists */
-	*in_file = fopen(IN_FILE_NAME, "r");
+	*in_file = fopen(path, "r");
 	if (*in_file == NULL) {
-		printf("%s does not exist!\n", IN_FILE_NAME);
+		printf("%s does not exist!\n", path);
 		exit(1);
 	}
 }
@@ -142,7 +138,6 @@ void close_files (FILE **in_file)
 	https://www.w3schools.com/c/ref_stdlib_qsort.php
 	[1]: i > j, [0]: equal, [-1]: j > i
 */
-
 int qsort_compare_ul(const void *a, const void *b) {
 	const unsigned long *m = a;
 	const unsigned long *n = b;
