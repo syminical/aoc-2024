@@ -1,4 +1,4 @@
-# AoC 2024 - Problem 1
+# AoC 2024 - Day 1
 
 --- Day 1: Historian Hysteria ---
 
