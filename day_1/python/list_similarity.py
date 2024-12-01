@@ -13,7 +13,8 @@ def main():
             "Print the similarity score for the two lists in FILE.\n\n"
             "e.g. FILE:\n"
             "   3  4\n"
-            "   9  5")
+            "   9  5\n"
+            "   8  7")
         sys.exit(0)
 
     # try to read the input file into two lists
