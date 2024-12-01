@@ -1,3 +1,5 @@
+# [I GOT THIS LIBRARY FROM HERE](https://github.com/Mashpoe/c-hashmap)
+
 # C HashMap
 A fast hash map/hash table (whatever you want to call it) for the C programming language. It can associate a key with a pointer or integer value in O(1) time.
 
@@ -187,7 +189,7 @@ For this reason, entry removal is disabled by default. If you want to enable it,
 ```c
 // removal of map elements is disabled by default because of the overhead.
 // if you want to enable this feature, uncomment the line below:
-//#define __HASHMAP_REMOVABLE 
+//#define __HASHMAP_REMOVABLE
 ```
 
 Use `hashmap_remove()` to remove entries:
