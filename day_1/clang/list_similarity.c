@@ -2,11 +2,14 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
+#include "map.h"
+#include "map.c"
 
 
 
-#define HELP_TEXT		"\nUsage: list_distance [FILE]\nPrint the distance between the two lists in FILE.\n\ne.g. FILE:\n   3  4\n   9  5\n   8  7\n\n"
+#define HELP_TEXT		"\nUsage: list_similarity [FILE]\nPrint the similarity score for the two lists in FILE.\n\ne.g. FILE:\n   3  4\n   9  5\n   8  7\n\n"
 #define MAX_LINE_LEN	15	/* $ wc -L FILE  (don't forget the \n and the \0) */
 
 
@@ -26,7 +29,7 @@ int main (size_t arg_count, char *args[arg_count])
 	/* ensure the input file is provided */
 	if (arg_count < 2) {
 		printf(HELP_TEXT);
-		return 0;
+		exit(0);
 	}
 
 	FILE *in_file;
@@ -43,38 +46,46 @@ int main (size_t arg_count, char *args[arg_count])
 	/* populate the lists */
 	rewind(in_file);
 	char *tok_str;
-	unsigned long list_a[n_lines];
-	unsigned long list_b[n_lines];
+	char list_a[n_lines][MAX_LINE_LEN / 2];
+	hashmap *list_b = hashmap_create(); /* str: size_t */
+	uintptr_t hm_result;
+	int hm_error;
 	for (
 		size_t i=0;
 		(line_len=f_get_line(&in_file, line, MAX_LINE_LEN));
 		++i
 	) {
+		/* add str to list_a */
 		tok_str = strtok(line, " ");
-		list_a[i] = strtoul(tok_str, NULL, 10);
+		memcpy(list_a[i], tok_str, strlen(tok_str)+1);
 
-		tok_str = strtok(NULL, " ");
-		list_b[i] = strtoul(tok_str, NULL, 10);
+		tok_str = strtok(NULL, " \n");
+		/* check if key exists in list_b */
+		if (hashmap_get(list_b, tok_str, strlen(tok_str), &hm_result)) {
+			/* exists, so update counter */
+			hm_error = hashmap_set(list_b, tok_str, strlen(tok_str), (size_t)hm_result + 1);
+		} else {
+			/* does not exist, so add it */
+			hm_error = hashmap_set(list_b, tok_str, strlen(tok_str), (size_t)1);
+		}
+		if (hm_error == -1)
+			fprintf(stderr, "hashmap_set: %s\n", strerror(hm_error));
 	}
 
-	/* sort the lists */
-	qsort(list_a, n_lines, sizeof(list_a[0]), qsort_compare_ul);
-	qsort(list_b, n_lines, sizeof(list_b[0]), qsort_compare_ul);
-
-	/* create a sum of differences between the lists */
+	/* create a sum of similarity scores */
 	unsigned long sum = 0;
 	for (size_t i=0; i < n_lines; ++i) {
-		if (list_a[i] > list_b[i])
-			sum += list_a[i] - list_b[i];
-		else
-			sum += list_b[i] - list_a[i];
+		if (hashmap_get(list_b, list_a[i], strlen(list_a[i]), &hm_result)) {
+			sum += strtoul(list_a[i], NULL, 10) * (size_t)hm_result;
+		}
 	}
 
 	printf("%zu\n", sum);
 
 	/* clean up */
 	close_files(&in_file);
-	return 0;
+	hashmap_free(list_b);
+	exit(0);
 }
 
 

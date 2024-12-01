@@ -1,5 +1,7 @@
 # AoC 2024 - Day 1 - C
 
+`$ make {build, distance, similarity}`
+
 ### Part 1 - `list_distance.c`
 ```c
 /* AoC 2024 - syminical */
