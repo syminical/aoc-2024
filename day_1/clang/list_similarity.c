@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
+
 #include "map.h"
 #include "map.c"
 
@@ -47,29 +49,35 @@ int main (size_t arg_count, char *args[arg_count])
 	rewind(in_file);
 	char *tok_str;
 	char list_a[n_lines][MAX_LINE_LEN / 2];
+	char terrible_hashmap_library_bandaid[n_lines][MAX_LINE_LEN / 2];
 	hashmap *list_b = hashmap_create(); /* str: size_t */
 	uintptr_t hm_result;
 	int hm_error;
 	for (
 		size_t i=0;
-		(line_len=f_get_line(&in_file, line, MAX_LINE_LEN));
+		(line_len=f_get_line(&in_file, line, MAX_LINE_LEN)) != 0;
 		++i
 	) {
 		/* add str to list_a */
 		tok_str = strtok(line, " ");
 		memcpy(list_a[i], tok_str, strlen(tok_str)+1);
 
+		/* list_b stuff */
 		tok_str = strtok(NULL, " \n");
+		memcpy(terrible_hashmap_library_bandaid[i], tok_str, strlen(tok_str)+1);
 		/* check if key exists in list_b */
-		if (hashmap_get(list_b, tok_str, strlen(tok_str), &hm_result)) {
+		if (hashmap_get(list_b, terrible_hashmap_library_bandaid[i],
+				strlen(terrible_hashmap_library_bandaid[i]), &hm_result)) {
 			/* exists, so update counter */
-			hm_error = hashmap_set(list_b, tok_str, strlen(tok_str), (size_t)hm_result + 1);
+			hm_error = hashmap_set(list_b, terrible_hashmap_library_bandaid[i],
+				strlen(terrible_hashmap_library_bandaid[i]), (size_t)hm_result + 1);
 		} else {
 			/* does not exist, so add it */
-			hm_error = hashmap_set(list_b, tok_str, strlen(tok_str), (size_t)1);
+			hm_error = hashmap_set(list_b, terrible_hashmap_library_bandaid[i],
+				strlen(terrible_hashmap_library_bandaid[i]), (size_t)1);
 		}
 		if (hm_error == -1)
-			fprintf(stderr, "hashmap_set: %s\n", strerror(hm_error));
+			fprintf(stderr, "hashmap_set: %s\n", strerror(errno));
 	}
 
 	/* create a sum of similarity scores */
@@ -87,7 +95,6 @@ int main (size_t arg_count, char *args[arg_count])
 	hashmap_free(list_b);
 	exit(0);
 }
-
 
 
 /*
